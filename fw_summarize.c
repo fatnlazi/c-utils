@@ -19,7 +19,7 @@ void TestResult_SetEc(void *const obj);
 void *FileLocation_Create(void);
 void FileLocation_Destroy(void *const obj);
 
-void *__obj_create(uint32_t s)
+inline void *__obj_create(uint32_t s)
 {
     void *o = malloc(s);
 
@@ -30,9 +30,53 @@ void *__obj_create(uint32_t s)
     return o;
 }
 
-void __obj_destroy(void *o)
+inline void __obj_destroy(void *o)
 {
     free(o);
+}
+
+typedef struct
+{
+    void *head;
+    void *tail;
+    uint32_t n;
+} LinkedList;
+
+typedef struct
+{
+    void *next;
+} LinkedListNode;
+
+void *LinkedList_Create(void)
+{
+    return __obj_create(sizeof(LinkedList));
+}
+
+void LinkedList_Destroy(void *const obj)
+{
+    __obj_destroy(obj);
+}
+
+void LinkedList_Push(void *const obj, void *const node)
+{
+    LinkedList *pll = (LinkedList *)obj;
+    LinkedListNode *plln = (LinkedListNode *)node;
+    LinkedListNode *pllp = NULL;
+
+    if ((obj) && (node))
+    {
+        if (pll->head)
+        {
+            pll->head = node;
+            pll->tail = node;
+            pll->n++;
+
+            plln->next = NULL;
+        }
+        else
+        {
+        }
+    }
 }
 
 typedef struct
@@ -155,6 +199,78 @@ void FileLocation_SetLine(void *const obj, uint32_t line)
     if (obj)
     {
         ((FileLocation *)obj)->line = line;
+    }
+}
+
+typedef struct
+{
+    char *name;
+    char *msg;
+} TestCase;
+
+void *TestCase_Create(void)
+{
+    return __obj_create(sizeof(TestCase));
+}
+
+void TestCase_Destroy(void *const obj)
+{
+    __obj_destroy(obj);
+}
+
+typedef struct
+{
+    char *name;
+    char *msg;
+    void *topTestCase;
+    uint32_t nrTestCase;
+} TestSuite;
+
+typedef struct
+{
+    TestSuite data;
+    LinkedListNode node;
+} TestSuiteNode;
+
+void *TestSuite_Create(void)
+{
+    return __obj_create(sizeof(TestSuiteNode));
+}
+
+void TestSuite_Destroy(void *const obj)
+{
+    __obj_destroy(obj);
+}
+
+typedef struct
+{
+    void *topTestSuite;
+    uint32_t nrTestSuite;
+} TestRunner;
+
+void *TestRunner_Create(void)
+{
+    return __obj_create(sizeof(TestRunner));
+}
+
+void TestRunner_Destroy(void *const obj)
+{
+    __obj_destroy(obj);
+}
+
+void TestRunner_PushTestSuite(void *const runner, void *const suite)
+{
+    TestRunner *r = runner;
+    if ((runner) && (suite))
+    {
+        if (r->topTestSuite)
+        {
+            LinkedList_Push(&((TestSuiteNode *)r->topTestSuite)->node, suite);
+        }
+        else
+        {
+        }
+        r->nrTestSuite++;
     }
 }
 
